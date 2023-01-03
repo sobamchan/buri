@@ -33,7 +33,7 @@ if __name__ == "__main__":
                 title = metadata["title"]
                 abstract = metadata["abstract"]
                 sienna.save(
-                    {"paper_id": paper_id, "title": title, "abstract": abstract},
+                    [{"paper_id": paper_id, "title": title, "abstract": abstract}],
                     os.path.join(args.odir, f"{paper_id}.jsonl"),
                 )
 
