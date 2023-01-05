@@ -62,7 +62,7 @@ def without_title(args):
             for line in fp:
                 pdfparse = json.loads(line.decode("utf-8"))
                 text = [
-                    f"section['section'] section['text']"
+                    f"{section['section']} {section['text']}"
                     for section in pdfparse["abstract"] + pdfparse["body_text"]
                     if section["text"] != ""
                 ]
