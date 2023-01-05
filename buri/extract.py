@@ -66,7 +66,7 @@ def without_title(args):
                     for section in pdfparse["abstract"] + pdfparse["body_text"]
                     if section["text"] != ""
                 ]
-                if len(texts) != 0:
+                if len(texts) == 0:
                     pass
                 else:
                     final_fp.write(" ".join(texts) + "\n")
