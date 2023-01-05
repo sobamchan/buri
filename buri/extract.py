@@ -1,25 +1,13 @@
 import gzip
-from tqdm import tqdm
 import json
 import os
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 
 import sienna
+from tqdm import tqdm
 
-if __name__ == "__main__":
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--data-dir",
-        type=str,
-        required=True,
-        help="Path to S2ORC dataset dir. It should contain two dirs, `metadata` and `pdf_parses`",
-    )
-    parser.add_argument(
-        "--odir", type=str, required=True, help="Path to save generated text file."
-    )
-    parser.add_argument("--final-single-file", type=str, required=False, default=None, help="One large jsonl file contains all records.")
-    args = parser.parse_args()
 
+def with_title(args: Namespace):
     # Extract titles
     print("Extract titiles...")
     meta_data_dir = os.path.join(args.data_dir, "metadata")
@@ -56,3 +44,55 @@ if __name__ == "__main__":
                 if args.final_single_file is not None:
                     with open(args.final_single_file, "a") as f:
                         f.write(json.dumps(record) + "\n")
+
+
+def without_title(args):
+    assert isinstance(
+        args.final_single_file, str
+    ), "This function now only supports to write to one huge file."
+
+    final_fp = open(args.final_single_file, "a")
+
+    # Extract main texts and add file created above
+    print("Extract body texts...")
+    pdf_parses_path = os.path.join(args.data_dir, "pdf_parses")
+    for fname in tqdm(os.listdir(pdf_parses_path)):
+        fpath = os.path.join(pdf_parses_path, fname)
+        with gzip.open(fpath) as fp:
+            for line in fp:
+                pdfparse = json.loads(line.decode("utf-8"))
+                text = [
+                    f"section['section'] section['text']"
+                    for section in pdfparse["abstract"] + pdfparse["body_text"]
+                    if section["text"] != ""
+                ]
+                final_fp.write(json.dumps(text) + "\n")
+
+    final_fp.close()
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--data-dir",
+        type=str,
+        required=True,
+        help="Path to S2ORC dataset dir. It should contain two dirs, `metadata` and `pdf_parses`",
+    )
+    parser.add_argument(
+        "--odir", type=str, required=True, help="Path to save generated text file."
+    )
+    parser.add_argument(
+        "--final-single-file",
+        type=str,
+        required=False,
+        default=None,
+        help="One large jsonl file contains all records.",
+    )
+    parser.add_argument("--with-title", action="store_true")
+    args = parser.parse_args()
+
+    if args.with_title:
+        with_title(args)
+    else:
+        without_title(args)
