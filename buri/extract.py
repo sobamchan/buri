@@ -61,12 +61,15 @@ def without_title(args):
         with gzip.open(fpath) as fp:
             for line in fp:
                 pdfparse = json.loads(line.decode("utf-8"))
-                text = [
+                texts = [
                     f"{section['section']} {section['text']}"
                     for section in pdfparse["abstract"] + pdfparse["body_text"]
                     if section["text"] != ""
                 ]
-                final_fp.write(json.dumps(text) + "\n")
+                if len(texts) != 0:
+                    pass
+                else:
+                    final_fp.write(" ".join(texts) + "\n")
 
     final_fp.close()
 
