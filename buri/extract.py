@@ -69,7 +69,7 @@ def without_title(args):
                 if len(texts) == 0:
                     pass
                 else:
-                    final_fp.write(" ".join(texts) + "\n")
+                    final_fp.write(" ".join(texts).replace("\n", " ") + "\n")
 
     final_fp.close()
 
